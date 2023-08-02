@@ -36,7 +36,7 @@ limite_de_processos_abertos = int(input("DEFINA QUANTAS INSTÂNCIAS ABERTAS PARA
 print()
 delay = int(10800)
 
-def Cascatear_janelas_e_injetar_fluxus(processo_roblox, limite_de_processos_abertos):
+def Arrumar_janelas_e_injetar_fluxus(processo_roblox, limite_de_processos_abertos):
     while True:
         def count_processes_by_name(processo_roblox):
             count = 0
@@ -91,7 +91,6 @@ def Cascatear_janelas_e_injetar_fluxus(processo_roblox, limite_de_processos_aber
                     print()
                 else:
                     print_with_timestamp ("SEM CMD'S")
-                    time.sleep(5)
                     print()
 
 def Printar_quantas_janelas_estão_abertas(processo_roblox):
@@ -128,7 +127,7 @@ def Fechar_todas_instâncias_a_cada_determinado_tempo(delay):
                 print()
         time.sleep(delay)
 
-thread1 = threading.Thread(target=Cascatear_janelas_e_injetar_fluxus, args=(processo_roblox, limite_de_processos_abertos))
+thread1 = threading.Thread(target=Arrumar_janelas_e_injetar_fluxus, args=(processo_roblox, limite_de_processos_abertos))
 thread2 = threading.Thread(target=Fechar_todas_instâncias_a_cada_determinado_tempo, args=(delay,))
 thread3 = threading.Thread(target=Printar_quantas_janelas_estão_abertas, args=(processo_roblox,))
 
