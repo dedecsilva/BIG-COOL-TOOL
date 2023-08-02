@@ -58,9 +58,12 @@ def Cascatear_janelas_e_injetar_fluxus(processo_roblox, limite_de_processos_aber
             user32.TileWindows(hwnd_desktop, 0x0001, None, 0, None)
             user32.TileWindows(hwnd_desktop, 0x0002, None, 0, None)
 
-            fluxusWindow = pygetwindow.getWindowsWithTitle("MainWindow")[0]
-            fluxusWindow[0].restore()
-            time.sleep(5)
+            fluxusWindow = pygetwindow.getWindowsWithTitle("MainWindow")
+            if fluxusWindow:
+                fluxusWindow = fluxusWindow[0]
+                fluxusWindow.restore()
+                time.sleep(5)
+                
             ok_erro_button = pyautogui.locateOnScreen(ok_erro, confidence=0.7)
 
             if ok_erro_button:
@@ -88,6 +91,7 @@ def Cascatear_janelas_e_injetar_fluxus(processo_roblox, limite_de_processos_aber
                     print()
                 else:
                     print_with_timestamp ("SEM CMD'S")
+                    time.sleep(5)
                     print()
 
 def Printar_quantas_janelas_estão_abertas(processo_roblox):
