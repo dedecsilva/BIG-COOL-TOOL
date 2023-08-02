@@ -6,7 +6,7 @@ import threading
 import colorama
 import datetime
 import cv2
-import ctypes as cts
+import ctypes
 import sys
 from ctypes import wintypes as wts
 
@@ -49,18 +49,14 @@ def Cascatear_janelas_e_injetar_fluxus(processo_roblox, limite_de_processos_aber
 
         if current_count >= limite_de_processos_abertos:    
             time.sleep(5)
-            def main(*argv):
-                kernel32 = cts.WinDLL("Kernel32.dll")
-                user32 = cts.WinDLL("User32.dll")
+            user32 = ctypes.WinDLL("user32.dll")
 
-                CascadeWindows = user32.CascadeWindows
-                CascadeWindows.argtypes = (wts.HWND, wts.UINT, wts.LPRECT, wts.UINT, wts.LPVOID)
-                CascadeWindows.restype = wts.WORD
+            HWND = wts.HWND
+            UINT = wts.UINT
 
-                hwnd = 0  # Desktop window
-                res = CascadeWindows(hwnd, 0x0004, None, 0, None)
-            if __name__ == "__main__":
-                rc = main(*sys.argv[1:])
+            hwnd_desktop = user32.GetDesktopWindow()
+            user32.TileWindows(hwnd_desktop, 0x0001, None, 0, None)
+            user32.TileWindows(hwnd_desktop, 0x0002, None, 0, None)
 
             fluxusWindow = pygetwindow.getWindowsWithTitle("MainWindow")[0]
             fluxusWindow.restore()
