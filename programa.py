@@ -58,8 +58,8 @@ def Cascatear_janelas_e_injetar_fluxus(processo_roblox, limite_de_processos_aber
             user32.TileWindows(hwnd_desktop, 0x0001, None, 0, None)
             user32.TileWindows(hwnd_desktop, 0x0002, None, 0, None)
 
-            fluxusWindow = pygetwindow.getWindowsWithTitle("MainWindow")
-            fluxusWindow.restore()
+            fluxusWindow = pygetwindow.getWindowsWithTitle("MainWindow")[0]
+            fluxusWindow[0].restore()
             time.sleep(5)
             ok_erro_button = pyautogui.locateOnScreen(ok_erro, confidence=0.7)
 
