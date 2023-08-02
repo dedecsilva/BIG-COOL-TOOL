@@ -92,6 +92,8 @@ def Arrumar_janelas_e_injetar_fluxus(processo_roblox, limite_de_processos_aberto
                 else:
                     print_with_timestamp ("SEM CMD'S")
                     print()
+                    
+            time.sleep(60)
 
 def Printar_quantas_janelas_estão_abertas(processo_roblox):
     while True:
