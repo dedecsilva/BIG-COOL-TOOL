@@ -28,11 +28,12 @@ def print_with_timestamp(msg):
 
 processo_roblox = "Windows10Universal.exe"
 processo_cmd = "cmd.exe"
-ok_erro = "Error button image.png"
-inject_button_img = "Inject button image.png"
-injetar_fluxus_ou_não = int(input("ATIVAR AUTO ATTACH FLUXUS? (1 > SIM | 2 > NÃO): "))
+ok_erro = "./imagens/Error button image.png"
+inject_button_img_fluxus = "./imagens/Inject button image fluxus.png"
+inject_button_img_electron = "./imagens/Inject button image electron.png"
+definir_auto_attach = int(input("DEFINA QUAL AUTO ATTACH VOCÊ VAI USAR (1 > FLUXUS | 2 > ELECTRON | 3 > NENHUM): "))
 print()
-limite_de_processos_abertos = int(input("DEFINA QUANTAS INSTÂNCIAS ABERTAS PARA COMEÇAR ARRUMAR AS JANELAS E INJETAR O FLUXUS: "))
+limite_de_processos_abertos = int(input("DEFINA QUANTAS INSTÂNCIAS ABERTAS PARA COMEÇAR ARRUMAR AS JANELAS E USAR O AUTO ATTACH: "))
 print()
 delay = int(10800)
 
@@ -86,14 +87,14 @@ def Injetar_fluxus(limite_de_processos):
                     ok_erro_button = pyautogui.locateOnScreen(ok_erro, confidence=0.7)
                     pyautogui.click(ok_erro_button)
                     time.sleep(2)
-                    inject_button = pyautogui.locateOnScreen(inject_button_img, confidence=0.7)
+                    inject_button = pyautogui.locateOnScreen(inject_button_img_fluxus, confidence=0.7)
                     pyautogui.click(inject_button)
                     time.sleep(5)
                     fluxusWindow.minimize()
                     print_with_timestamp ("FLUXUS INJETADO E ERROS FECHADOS")
                     print()
                 else:
-                    inject_button = pyautogui.locateOnScreen(inject_button_img, confidence=0.7)
+                    inject_button = pyautogui.locateOnScreen(inject_button_img_fluxus, confidence=0.7)
                     pyautogui.click(inject_button)
                     time.sleep(5)
                     fluxusWindow.minimize()
@@ -103,7 +104,51 @@ def Injetar_fluxus(limite_de_processos):
                 print_with_timestamp ("FLUXUS NÃO ENCONTRADO")
                 print()
 
-        time.sleep(30)
+        time.sleep(60)
+        
+def Injetar_electron(limite_de_processos):
+     while True:
+         
+        def count_processes_by_name(processo_roblox):
+            count = 0
+            for process in psutil.process_iter(['name']):
+                if process.info['name'] == processo_roblox:
+                    count += 1
+            return count
+
+        current_count = count_processes_by_name(processo_roblox)
+        
+        if current_count >= limite_de_processos:
+            time.sleep(5)
+            electronWindow = pygetwindow.getWindowsWithTitle("Electron")
+            if electronWindow:
+                electronWindow = electronWindow[0]
+                electronWindow.restore()
+                time.sleep(5)
+                    
+                ok_erro_button = pyautogui.locateOnScreen(ok_erro, confidence=0.7)
+
+                if ok_erro_button:
+                    pyautogui.click(ok_erro_button)
+                    time.sleep(2)
+                    inject_button = pyautogui.locateOnScreen(inject_button_img_electron, confidence=0.7)
+                    pyautogui.click(inject_button)
+                    time.sleep(5)
+                    electronWindow.minimize()
+                    print_with_timestamp ("ELECTRON INJETADO E ERROS FECHADOS")
+                    print()
+                else:
+                    inject_button = pyautogui.locateOnScreen(inject_button_img_electron, confidence=0.7)
+                    pyautogui.click(inject_button)
+                    time.sleep(5)
+                    electronWindow.minimize()
+                    print_with_timestamp ("ELECTRON INJETADO")
+                    print()
+            else:
+                print_with_timestamp ("ELECTRON NÃO ENCONTRADO")
+                print()
+
+        time.sleep(60)
 
 def Printar_quantas_janelas_estão_abertas():
     while True:
@@ -154,7 +199,7 @@ def Fechar_todas_instâncias_a_cada_determinado_tempo(processo_roblox, delay):
         
 # Lógica de execução das threads
 
-# 1° - Injetar fluxus para printar em primeiro lugar se o auto attach está ativado ou desativado
+# 1° - Definir auto attach para printar em primeiro lugar se o auto attach está ativado ou desativado
 # 2° - Printar as janelas abertas, pois é uma informação fundamental pro programa
 # 3° - Arrumar janelas, porque depois de injetar o fluxus é a função principal do programa
 # 4° - Fechar erros do account manager pois, depois de arrumar as janelas é a outra principal função do programa
@@ -162,17 +207,23 @@ def Fechar_todas_instâncias_a_cada_determinado_tempo(processo_roblox, delay):
 
 Thread_arrumar_janelas = threading.Thread(target=Arrumar_janelas, args=(limite_de_processos_abertos,))
 Thread_injetar_fluxus = threading.Thread(target=Injetar_fluxus, args=(limite_de_processos_abertos,))
+Thread_injetar_eletron = threading.Thread(target=Injetar_electron, args=(limite_de_processos_abertos,))
 Thread_fechar_todas_instâncias_a_cada_determinado_tempo = threading.Thread(target=Fechar_todas_instâncias_a_cada_determinado_tempo, args=(processo_roblox, delay))
 Thread_printar_quantas_janelas_estão_abertas = threading.Thread(target=Printar_quantas_janelas_estão_abertas)
 Thread_fechar_erros_do_account_manager = threading.Thread(target=Fechar_erros_do_account_manager,args=(processo_cmd,))
 
-if injetar_fluxus_ou_não == 1:
+if definir_auto_attach == 1:
     Thread_injetar_fluxus.start()
-    print(colorama.Back.GREEN + " AUTO ATTACH FLUXUS ATIVADO " + colorama.Back.RESET)
+    print(colorama.Back.MAGENTA + " AUTO ATTACH FLUXUS ATIVADO " + colorama.Back.RESET)
     print()
-else:
-    print(colorama.Back.RED + " AUTO ATTACH FLUXUS DESATIVADO " + colorama.Back.RESET)
+if definir_auto_attach == 2:
+    Thread_injetar_eletron.start()
+    print(colorama.Back.BLUE + " AUTO ATTACH ELECTRON ATIVADO " + colorama.Back.RESET)
     print()
+if definir_auto_attach == 3:
+    print(colorama.Back.RED + " AUTO ATTACH DESATIVADO " + colorama.Back.RESET)
+    print()
+
 Thread_printar_quantas_janelas_estão_abertas.start()
 Thread_arrumar_janelas.start()
 Thread_fechar_erros_do_account_manager.start()
