@@ -57,7 +57,7 @@ def Arrumar_janelas(limite_de_processos_abertos):
             user32.TileWindows(hwnd_desktop, 0x0001, None, 0, None)
             user32.TileWindows(hwnd_desktop, 0x0002, None, 0, None)
                         
-            time.sleep(300)
+            time.sleep(60)
 
 def Injetar_fluxus(limite_de_processos):
      while True:
@@ -104,7 +104,7 @@ def Injetar_fluxus(limite_de_processos):
                 print_with_timestamp ("FLUXUS NÃO ENCONTRADO")
                 print()
 
-        time.sleep(60)
+        time.sleep(15)
         
 def Injetar_electron(limite_de_processos):
      while True:
@@ -148,7 +148,7 @@ def Injetar_electron(limite_de_processos):
                 print_with_timestamp ("ELECTRON NÃO ENCONTRADO")
                 print()
 
-        time.sleep(60)
+        time.sleep(15)
 
 def Printar_quantas_janelas_estão_abertas():
     while True:
