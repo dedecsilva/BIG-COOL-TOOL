@@ -28,9 +28,9 @@ def print_with_timestamp(msg):
 
 processo_roblox = "Windows10Universal.exe"
 processo_cmd = "cmd.exe"
-ok_erro = "./imagens/Error button image.png"
-inject_button_img_fluxus = "./imagens/Inject button image fluxus.png"
-inject_button_img_electron = "./imagens/Inject button image electron.png"
+ok_erro = "imagens/Error button image.png"
+inject_button_img_fluxus = "imagens/Inject button image fluxus.png"
+inject_button_img_electron = "imagens/Inject button image electron.png"
 definir_auto_attach = int(input("DEFINA QUAL AUTO ATTACH VOCÊ VAI USAR (1 > FLUXUS | 2 > ELECTRON | 3 > NENHUM): "))
 print()
 limite_de_processos_abertos = int(input("DEFINA QUANTAS INSTÂNCIAS ABERTAS PARA COMEÇAR ARRUMAR AS JANELAS E USAR O AUTO ATTACH: "))
