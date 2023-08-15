@@ -104,7 +104,7 @@ def Injetar_fluxus(limite_de_processos):
                 print_with_timestamp ("FLUXUS NÃO ENCONTRADO")
                 print()
 
-        time.sleep(15)
+        time.sleep(60)
         
 def Injetar_electron(limite_de_processos):
      while True:
@@ -148,7 +148,7 @@ def Injetar_electron(limite_de_processos):
                 print_with_timestamp ("ELECTRON NÃO ENCONTRADO")
                 print()
 
-        time.sleep(15)
+        time.sleep(60)
 
 def Printar_quantas_janelas_estão_abertas():
     while True:
