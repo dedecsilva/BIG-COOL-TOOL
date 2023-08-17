@@ -13,7 +13,7 @@ import requests
 import wget
 from pkg_resources import resource_filename
 
-current_version = 1.1
+current_version = 1.2
 
 colorama.init(convert=True)
 
@@ -113,12 +113,12 @@ título = """
                            
 """
 
-print(colorama.Back.CYAN + colorama.Fore.WHITE + título + colorama.Back.RESET + colorama.Fore.RESET)
+print(colorama.Back.CYAN + colorama.Fore.BLACK + título + colorama.Back.RESET + colorama.Fore.RESET)
 print()
 
 print (f"{colorama.Back.BLUE} VERSÃO ATUAL: {current_version} {colorama.Back.RESET}")
 print()
-print (colorama.Back.WHITE + " LENDO CONFIGURAÇÃO DO ARQUIVO CONFIG.JSON " + colorama.Back.RESET)
+print (colorama.Back.WHITE + colorama.Fore.BLACK + " LENDO CONFIGURAÇÃO DO ARQUIVO CONFIG.JSON " + colorama.Back.RESET + colorama.Fore.RESET)
 print()
 
 def print_with_timestamp(msg):
@@ -149,7 +149,7 @@ tempo_para_fechar_erros_do_account_manager = int(config["tempo_para_fechar_erros
 
 definir_auto_attach = int(input("DEFINA QUAL AUTO ATTACH VOCÊ VAI USAR (1 > FLUXUS | 2 > ELECTRON | 3 > NENHUM): "))
 print()
-limite_de_processos_abertos = int(input("DEFINA QUANTAS instancias ABERTAS PARA COMEÇAR ARRUMAR AS JANELAS E USAR O AUTO ATTACH: "))
+limite_de_processos_abertos = int(input("DEFINA QUANTAS INSTÂNCIAS DEVEM ESTAR ABERTAS PARA COMEÇAR ARRUMAR AS JANELAS E USAR O AUTO ATTACH: "))
 print()
 
 def Arrumar_janelas(limite_de_processos_abertos, tempo_para_arrumar_as_janelas):
