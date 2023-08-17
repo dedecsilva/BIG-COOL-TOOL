@@ -5,10 +5,104 @@ import time
 import threading
 import colorama
 import datetime
-import cv2
 import ctypes
+import json
+import subprocess
+import os
+import requests
+import wget
+from pkg_resources import resource_filename
+
+current_version = 1.1
 
 colorama.init(convert=True)
+
+# AUTO UPDATE
+
+repo_url = f"https://api.github.com/repos/dedecsilva/BIG-COOL-TOOL/releases/latest"
+nome_base_do_executável = "BIG COOL TOOL"
+raiz_dos_executáveis = os.path.dirname(os.path.abspath(__file__))
+
+if requests.get(repo_url).status_code == 200:
+    latest_release = requests.get(repo_url).json()
+    latest_version = latest_release["tag_name"]
+    
+latest_version = float(latest_version)
+    
+if latest_version > current_version:
+    print("NOVA VERSÃO DISPONÍVEL", (latest_version))
+    atualizar_ou_não = input("GOSTARIA DE ATUALIZAR PARA A VERSÃO MAIS RECENTE? (1> SIM | 2> NÃO):")
+    if atualizar_ou_não == 1:
+        url_do_executável = latest_release["assets"][0]["browser_download_url"]
+        nome_do_executável = f"{nome_base_do_executável} {latest_version}.exe"
+
+        print("BAIXANDO A NOVA VERSÃO...")
+        wget.download(url_do_executável, nome_do_executável)
+        print("DOWNLOAD CONCLUÍDO. ABRA A VERSÃO MAIS RECENTE PARA EXCLUIR A VERSÃO ANTIGA")
+        
+for arquivo in os.listdir(raiz_dos_executáveis):  
+    if arquivo.endswith(".exe") and "BIG COOL TOOL" in arquivo and arquivo != f"{nome_base_do_executável} {current_version}.exe":
+            os.remove(os.path.join(raiz_dos_executáveis, arquivo))
+            print( colorama.Back.RED + " VERSÕES ANTIGAS REMOVIDAS " + colorama.Back.RESET)
+
+# CRIAR E ATUALIZAR ARQUIVO DE CONFIGURAÇÃO
+
+config_padrao = {
+    "processo_roblox": "Windows10Universal.exe",
+    "processo_cmd": "cmd.exe",
+    "nome_janela_erro_electron": "Roblox Not Found",
+    "ok_erro": "imagens/Error button image.png",
+    "inject_button_img_fluxus": "imagens/Inject button image fluxus.png",
+    "inject_button_img_electron": "imagens/Inject button image electron.png",
+    "tempo_para_fechar_todas_as_instancias_em_horas": 3,
+    "caminho_electron": "",
+    "caminho_fluxus": "",
+    "tempo_para_dar_auto_attach_em_segundos": 60,
+    "tempo_para_arrumar_as_janelas_em_segundos": 120,
+    "tempo_para_fechar_erros_do_account_manager_em_segundos": 300
+}
+
+def criar_arquivo_config_padrao(nome_do_arquivo):
+    with open(nome_do_arquivo, "w") as f:
+        json.dump(config_padrao, f, indent=4)
+
+def atualizar_arquivo_config(nome_do_arquivo):
+    if os.path.exists(nome_do_arquivo):
+        with open(nome_do_arquivo, "r") as f:
+            config_atual = json.load(f)
+
+        for chave in config_padrao:
+            if chave not in config_atual:
+                config_atual[chave] = config_padrao[chave]
+
+        with open(nome_do_arquivo, "w") as f:
+            json.dump(config_atual, f, indent=4)
+
+nome_do_arquivo_config = "config.json"
+
+if not os.path.exists(nome_do_arquivo_config):
+    criar_arquivo_config_padrao(nome_do_arquivo_config)
+    print("ARQUIVO DE CONFIGURAÇÃO CRIADO")
+    print()
+    input("Pressione qualquer tecla para continuar...")
+    os.system("cls")
+else:
+    with open(nome_do_arquivo_config, "r") as f:
+        config_atual = json.load(f)
+
+    chaves_atuais = set(config_atual.keys())
+    chaves_padrao = set(config_padrao.keys())
+
+    novas_chaves = chaves_padrao - chaves_atuais
+
+    if novas_chaves:
+        atualizar_arquivo_config(nome_do_arquivo_config)
+        print("ARQUIVO DE CONFIGURAÇÃO ATUALIZADO")
+        print()
+        input("Pressione qualquer tecla para continuar...")
+        os.system("cls")
+
+# PROGRAMA PRINCIPAL
 
 título = """
     __________  ____  __   
@@ -22,22 +116,43 @@ título = """
 print(colorama.Back.CYAN + colorama.Fore.WHITE + título + colorama.Back.RESET + colorama.Fore.RESET)
 print()
 
+print (f"{colorama.Back.BLUE} VERSÃO ATUAL: {current_version} {colorama.Back.RESET}")
+print()
+print (colorama.Back.WHITE + " LENDO CONFIGURAÇÃO DO ARQUIVO CONFIG.JSON " + colorama.Back.RESET)
+print()
+
 def print_with_timestamp(msg):
     timestamp = datetime.datetime.now().strftime("%H:%M")
     print(f"{timestamp} | {msg}")
 
-processo_roblox = "Windows10Universal.exe"
-processo_cmd = "cmd.exe"
-ok_erro = "imagens/Error button image.png"
-inject_button_img_fluxus = "imagens/Inject button image fluxus.png"
-inject_button_img_electron = "imagens/Inject button image electron.png"
+def carregar_configuração_do_programa(nome_do_arquivo):
+    with open(nome_do_arquivo, "r", encoding="utf-8") as f:
+        config = json.load(f)
+    return config
+
+config = carregar_configuração_do_programa("config.json")
+
+processo_roblox = config["processo_roblox"]
+processo_cmd = config["processo_cmd"]
+nome_da_janela_de_erro_electron = config["nome_janela_erro_electron"]
+ok_erro = resource_filename(__name__, config["ok_erro"])
+inject_button_img_fluxus = resource_filename(__name__, config["inject_button_img_fluxus"])
+inject_button_img_electron = resource_filename(__name__, config["inject_button_img_electron"])
+
+caminho_electron = config["caminho_electron"]
+caminho_fluxus = config["caminho_fluxus"]
+
+tempo_para_fechar_todas_as_instancias = int(config["tempo_para_fechar_todas_as_instancias_em_horas"]) * 3600
+tempo_para_dar_auto_attach = int(config["tempo_para_dar_auto_attach_em_segundos"])
+tempo_para_arrumar_as_janelas = int(config["tempo_para_arrumar_as_janelas_em_segundos"])
+tempo_para_fechar_erros_do_account_manager = int(config["tempo_para_fechar_erros_do_account_manager_em_segundos"])
+
 definir_auto_attach = int(input("DEFINA QUAL AUTO ATTACH VOCÊ VAI USAR (1 > FLUXUS | 2 > ELECTRON | 3 > NENHUM): "))
 print()
-limite_de_processos_abertos = int(input("DEFINA QUANTAS INSTÂNCIAS ABERTAS PARA COMEÇAR ARRUMAR AS JANELAS E USAR O AUTO ATTACH: "))
+limite_de_processos_abertos = int(input("DEFINA QUANTAS instancias ABERTAS PARA COMEÇAR ARRUMAR AS JANELAS E USAR O AUTO ATTACH: "))
 print()
-delay = int(10800)
 
-def Arrumar_janelas(limite_de_processos_abertos):
+def Arrumar_janelas(limite_de_processos_abertos, tempo_para_arrumar_as_janelas):
     while True:
         
         def count_processes_by_name(processo_roblox):
@@ -57,7 +172,7 @@ def Arrumar_janelas(limite_de_processos_abertos):
             user32.TileWindows(hwnd_desktop, 0x0001, None, 0, None)
             user32.TileWindows(hwnd_desktop, 0x0002, None, 0, None)
                         
-            time.sleep(60)
+            time.sleep(tempo_para_arrumar_as_janelas)
 
 def Injetar_fluxus(limite_de_processos):
      while True:
@@ -103,10 +218,11 @@ def Injetar_fluxus(limite_de_processos):
             else:
                 print_with_timestamp ("FLUXUS NÃO ENCONTRADO")
                 print()
+                subprocess.run(caminho_fluxus)
 
-        time.sleep(60)
+            time.sleep(tempo_para_dar_auto_attach)
         
-def Injetar_electron(limite_de_processos):
+def Injetar_electron(limite_de_processos, nome_da_janela_de_erro_do_electron):
      while True:
          
         def count_processes_by_name(processo_roblox):
@@ -125,12 +241,15 @@ def Injetar_electron(limite_de_processos):
                 electronWindow = electronWindow[0]
                 electronWindow.restore()
                 time.sleep(5)
+                
+                def detectar_janela_de_erro_do_electron(nome_da_janela_de_erro_do_electron):
+                    return pygetwindow.getWindowsWithTitle(nome_da_janela_de_erro_do_electron)
                     
-                ok_erro_button = pyautogui.locateOnScreen(ok_erro, confidence=0.7)
+                janela_de_erro = detectar_janela_de_erro_do_electron(nome_da_janela_de_erro_do_electron)
 
-                if ok_erro_button:
-                    pyautogui.click(ok_erro_button)
-                    time.sleep(2)
+                if janela_de_erro:
+                    for janela_de_erro in janela_de_erro:
+                        janela_de_erro.close()
                     inject_button = pyautogui.locateOnScreen(inject_button_img_electron, confidence=0.7)
                     pyautogui.click(inject_button)
                     time.sleep(5)
@@ -145,10 +264,11 @@ def Injetar_electron(limite_de_processos):
                     print_with_timestamp ("ELECTRON INJETADO")
                     print()
             else:
-                print_with_timestamp ("ELECTRON NÃO ENCONTRADO")
+                print_with_timestamp ("ELECTRON NÃO ENCONTRADO, ABRINDO...")
                 print()
+                subprocess.run(caminho_electron)
 
-        time.sleep(60)
+            time.sleep(tempo_para_dar_auto_attach)
 
 def Printar_quantas_janelas_estão_abertas():
     while True:
@@ -176,9 +296,9 @@ def Printar_quantas_janelas_estão_abertas():
                 print ()
                 time.sleep(10)
                 
-def Fechar_erros_do_account_manager(processo_cmd):
+def Fechar_erros_do_account_manager(processo_cmd, tempo_para_fechar_erros_do_account_manager):
     while True:
-        time.sleep(300)
+        time.sleep(tempo_para_fechar_erros_do_account_manager)
         for process in psutil.process_iter(['name']):
             if process.info['name'] == processo_cmd:
                 process.kill()
@@ -188,13 +308,13 @@ def Fechar_erros_do_account_manager(processo_cmd):
                 print_with_timestamp ("SEM ERROS DO ACCOUNT MANAGER")
                 print()
 
-def Fechar_todas_instâncias_a_cada_determinado_tempo(processo_roblox, delay):
+def Fechar_todas_instancias_a_cada_determinado_tempo(processo_roblox, tempo_para_fechar_todas_as_instancias):
     while True:
-        time.sleep(delay)
+        time.sleep(tempo_para_fechar_todas_as_instancias)
         for process in psutil.process_iter(['name']):
             if process.info['name'] == processo_roblox:
                 process.kill()
-                print_with_timestamp ("TODAS INSTÂNCIAS FORAM FECHADAS")
+                print_with_timestamp ("TODAS instancias FORAM FECHADAS")
                 print()
         
 # Lógica de execução das threads
@@ -203,14 +323,14 @@ def Fechar_todas_instâncias_a_cada_determinado_tempo(processo_roblox, delay):
 # 2° - Printar as janelas abertas, pois é uma informação fundamental pro programa
 # 3° - Arrumar janelas, porque depois de injetar o fluxus é a função principal do programa
 # 4° - Fechar erros do account manager pois, depois de arrumar as janelas é a outra principal função do programa
-# 5° - Por final fechar todas as instâncias, pois é a coisa que mais demora pro programa fazer, como se ela fosse a última camada que ele executa
+# 5° - Por final fechar todas as instancias, pois é a coisa que mais demora pro programa fazer, como se ela fosse a última camada que ele executa
 
-Thread_arrumar_janelas = threading.Thread(target=Arrumar_janelas, args=(limite_de_processos_abertos,))
+Thread_arrumar_janelas = threading.Thread(target=Arrumar_janelas, args=(limite_de_processos_abertos, tempo_para_arrumar_as_janelas))
 Thread_injetar_fluxus = threading.Thread(target=Injetar_fluxus, args=(limite_de_processos_abertos,))
-Thread_injetar_eletron = threading.Thread(target=Injetar_electron, args=(limite_de_processos_abertos,))
-Thread_fechar_todas_instâncias_a_cada_determinado_tempo = threading.Thread(target=Fechar_todas_instâncias_a_cada_determinado_tempo, args=(processo_roblox, delay))
+Thread_injetar_eletron = threading.Thread(target=Injetar_electron, args=(limite_de_processos_abertos, nome_da_janela_de_erro_electron))
+Thread_fechar_todas_instancias_a_cada_determinado_tempo = threading.Thread(target=Fechar_todas_instancias_a_cada_determinado_tempo, args=(processo_roblox, tempo_para_fechar_todas_as_instancias))
 Thread_printar_quantas_janelas_estão_abertas = threading.Thread(target=Printar_quantas_janelas_estão_abertas)
-Thread_fechar_erros_do_account_manager = threading.Thread(target=Fechar_erros_do_account_manager,args=(processo_cmd,))
+Thread_fechar_erros_do_account_manager = threading.Thread(target=Fechar_erros_do_account_manager,args=(processo_cmd, tempo_para_fechar_erros_do_account_manager))
 
 if definir_auto_attach == 1:
     Thread_injetar_fluxus.start()
@@ -227,4 +347,4 @@ if definir_auto_attach == 3:
 Thread_printar_quantas_janelas_estão_abertas.start()
 Thread_arrumar_janelas.start()
 Thread_fechar_erros_do_account_manager.start()
-Thread_fechar_todas_instâncias_a_cada_determinado_tempo.start()
+Thread_fechar_todas_instancias_a_cada_determinado_tempo.start()
