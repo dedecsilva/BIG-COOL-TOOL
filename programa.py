@@ -20,7 +20,7 @@ colorama.init(convert=True)
 # AUTO UPDATE
 
 repo_url = f"https://api.github.com/repos/dedecsilva/BIG-COOL-TOOL/releases/latest"
-nome_base_do_executável = "BIG COOL TOOL"
+nome_base_do_executável = "BIG COOL TOOL".replace(" ", ".")
 raiz_dos_executáveis = os.path.dirname(os.path.abspath(__file__))
 
 if requests.get(repo_url).status_code == 200:
