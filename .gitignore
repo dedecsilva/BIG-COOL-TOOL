@@ -1,4 +1,3 @@
-
-BIG COOL TOOL 1.2.exe
-BIG COOL TOOL 1.2.spec
 build
+*.exe
+*.spec

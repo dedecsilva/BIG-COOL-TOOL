@@ -11,9 +11,10 @@ import subprocess
 import os
 import requests
 import wget
+import sys
 from pkg_resources import resource_filename
 
-current_version = 1.2
+current_version = 1.3
 
 colorama.init(convert=True)
 
@@ -31,14 +32,18 @@ latest_version = float(latest_version)
     
 if latest_version > current_version:
     print("NOVA VERSÃO DISPONÍVEL", (latest_version))
-    atualizar_ou_não = input("GOSTARIA DE ATUALIZAR PARA A VERSÃO MAIS RECENTE? (1> SIM | 2> NÃO):")
+    atualizar_ou_não = int(input("GOSTARIA DE ATUALIZAR PARA A VERSÃO MAIS RECENTE? (1> SIM | 2> NÃO): "))
     if atualizar_ou_não == 1:
         url_do_executável = latest_release["assets"][0]["browser_download_url"]
         nome_do_executável = f"{nome_base_do_executável} {latest_version}.exe"
-
+        
         print("BAIXANDO A NOVA VERSÃO...")
+        print()
         wget.download(url_do_executável, nome_do_executável)
         print("DOWNLOAD CONCLUÍDO. ABRA A VERSÃO MAIS RECENTE PARA EXCLUIR A VERSÃO ANTIGA")
+        print()
+        input("PRESSIONE QUALQUER TECLA PARA FECHAR O PROGRAMA...")
+        sys.exit()
         
 for arquivo in os.listdir(raiz_dos_executáveis):  
     if arquivo.endswith(".exe") and "BIG COOL TOOL" in arquivo and arquivo != f"{nome_base_do_executável} {current_version}.exe":
