@@ -14,7 +14,7 @@ import sys
 import screeninfo
 from pkg_resources import resource_filename
 
-current_version = 1.4
+current_version = 1.5
 
 colorama.init(convert=True)
 
@@ -154,64 +154,53 @@ tempo_para_fechar_erros_do_account_manager = int(config["tempo_para_fechar_erros
 
 definir_auto_attach = int(input("DEFINA QUAL AUTO ATTACH VOCÊ VAI USAR (1 > FLUXUS | 2 > ELECTRON | 3 > NENHUM): "))
 print()
-limite_de_processos_abertos = int(input("DEFINA QUANTAS INSTÂNCIAS DEVEM ESTAR ABERTAS PARA COMEÇAR ARRUMAR AS JANELAS E USAR O AUTO ATTACH: "))
+limite_de_processos_abertos = int(input("DEFINA QUANTAS INSTÂNCIAS DEVEM ESTAR ABERTAS PARA USAR O AUTO ATTACH: "))
 print()
 
-def Arrumar_janelas(limite_de_processos_abertos, tempo_para_arrumar_as_janelas):
+def Arrumar_janelas():
     while True:
-        
-        def count_processes_by_name(processo_roblox):
-            count = 0
-            for process in psutil.process_iter(['name']):
-                if process.info['name'] == processo_roblox:
-                    count += 1
-            return count
+        windows = pygetwindow.getWindowsWithTitle("Roblox")
+        windows = [window for window in windows if window.title != "Roblox Account Manager"]
 
-        current_count = count_processes_by_name(processo_roblox)
+        monitor_info = screeninfo.get_monitors()[0]
+        monitor_width = monitor_info.width
+        monitor_height = monitor_info.height
+
+        max_windows_per_row = 10
+        x_offset = 100 
+        y_offset = 100 
+        width = 100
+        height = 100
+
+        current_x = 0
+        current_y = 0
+        windows_in_current_row = 0
+
+        for i, window in enumerate(windows):
+            if windows_in_current_row >= max_windows_per_row:
+                current_x = 0
+                current_y += y_offset
+                windows_in_current_row = 0
+
+            if current_x + width > monitor_width:
+                current_x = 0
+                current_y += y_offset
+                windows_in_current_row = 0
+
+            if current_y + height > monitor_height:
+                break
+
+            window.resizeTo(width, height)
+
+            window_x = min(current_x, monitor_width - width)
+            window_y = min(current_y, monitor_height - height)
+
+            window.moveTo(window_x, window_y)
+
+            current_x += x_offset
+            windows_in_current_row += 1
             
-        if current_count >= limite_de_processos_abertos:   
-            windows = pygetwindow.getWindowsWithTitle("Roblox")
-            windows = [window for window in windows if window.title != "Roblox Account Manager"]
-
-            monitor_info = screeninfo.get_monitors()[0]
-            monitor_width = monitor_info.width
-            monitor_height = monitor_info.height
-
-            max_windows_per_row = 10
-            x_offset = 100 
-            y_offset = 100 
-            width = 100
-            height = 100
-
-            current_x = 0
-            current_y = 0
-            windows_in_current_row = 0
-
-            for i, window in enumerate(windows):
-                if windows_in_current_row >= max_windows_per_row:
-                    current_x = 0
-                    current_y += y_offset
-                    windows_in_current_row = 0
-
-                if current_x + width > monitor_width:
-                    current_x = 0
-                    current_y += y_offset
-                    windows_in_current_row = 0
-
-                if current_y + height > monitor_height:
-                    break
-
-                window.resizeTo(width, height)
-
-                window_x = min(current_x, monitor_width - width)
-                window_y = min(current_y, monitor_height - height)
-
-                window.moveTo(window_x, window_y)
-
-                current_x += x_offset
-                windows_in_current_row += 1
-
-                time.sleep(tempo_para_arrumar_as_janelas)
+        time.sleep(tempo_para_arrumar_as_janelas)
 
 def Injetar_fluxus(limite_de_processos):
      while True:
@@ -335,7 +324,7 @@ def Printar_quantas_janelas_estão_abertas():
                 print ()
                 time.sleep(10)
                 
-def Fechar_erros_do_account_manager(processo_cmd, tempo_para_fechar_erros_do_account_manager):
+def Fechar_erros_do_account_manager(processo_cmd):
     while True:
         time.sleep(tempo_para_fechar_erros_do_account_manager)
         for process in psutil.process_iter(['name']):
@@ -347,7 +336,7 @@ def Fechar_erros_do_account_manager(processo_cmd, tempo_para_fechar_erros_do_acc
                 print_with_timestamp ("SEM ERROS DO ACCOUNT MANAGER")
                 print()
 
-def Fechar_todas_instancias_a_cada_determinado_tempo(processo_roblox, tempo_para_fechar_todas_as_instancias):
+def Fechar_todas_instancias_a_cada_determinado_tempo(processo_roblox):
     while True:
         time.sleep(tempo_para_fechar_todas_as_instancias)
         for process in psutil.process_iter(['name']):
@@ -364,12 +353,12 @@ def Fechar_todas_instancias_a_cada_determinado_tempo(processo_roblox, tempo_para
 # 4° - Fechar erros do account manager pois, depois de arrumar as janelas é a outra principal função do programa
 # 5° - Por final fechar todas as instancias, pois é a coisa que mais demora pro programa fazer, como se ela fosse a última camada que ele executa
 
-Thread_arrumar_janelas = threading.Thread(target=Arrumar_janelas, args=(limite_de_processos_abertos, tempo_para_arrumar_as_janelas))
+Thread_arrumar_janelas = threading.Thread(target=Arrumar_janelas)
 Thread_injetar_fluxus = threading.Thread(target=Injetar_fluxus, args=(limite_de_processos_abertos,))
 Thread_injetar_eletron = threading.Thread(target=Injetar_electron, args=(limite_de_processos_abertos, nome_da_janela_de_erro_electron))
-Thread_fechar_todas_instancias_a_cada_determinado_tempo = threading.Thread(target=Fechar_todas_instancias_a_cada_determinado_tempo, args=(processo_roblox, tempo_para_fechar_todas_as_instancias))
+Thread_fechar_todas_instancias_a_cada_determinado_tempo = threading.Thread(target=Fechar_todas_instancias_a_cada_determinado_tempo, args=(processo_roblox,))
 Thread_printar_quantas_janelas_estão_abertas = threading.Thread(target=Printar_quantas_janelas_estão_abertas)
-Thread_fechar_erros_do_account_manager = threading.Thread(target=Fechar_erros_do_account_manager,args=(processo_cmd, tempo_para_fechar_erros_do_account_manager))
+Thread_fechar_erros_do_account_manager = threading.Thread(target=Fechar_erros_do_account_manager,args=(processo_cmd,))
 
 if definir_auto_attach == 1:
     Thread_injetar_fluxus.start()
