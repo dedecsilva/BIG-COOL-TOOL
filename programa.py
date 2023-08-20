@@ -46,7 +46,7 @@ if latest_version > current_version:
         sys.exit()
         
 for arquivo in os.listdir(raiz_dos_executáveis):  
-    if arquivo.endswith(".exe") and "BIG COOL TOOL" in arquivo and arquivo != f"{nome_base_do_executável} {current_version}.exe":
+    if arquivo.endswith(".exe") and "BIG COOL TOOL" in arquivo and arquivo != f"{nome_base_do_executável}.{current_version}.exe":
             os.remove(os.path.join(raiz_dos_executáveis, arquivo))
             print( colorama.Back.RED + " VERSÕES ANTIGAS REMOVIDAS " + colorama.Back.RESET)
 
