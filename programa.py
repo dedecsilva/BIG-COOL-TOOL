@@ -5,16 +5,16 @@ import time
 import threading
 import colorama
 import datetime
-import ctypes
 import json
 import subprocess
 import os
 import requests
 import wget
 import sys
+import screeninfo
 from pkg_resources import resource_filename
 
-current_version = 1.3
+current_version = 1.4
 
 colorama.init(convert=True)
 
@@ -168,16 +168,50 @@ def Arrumar_janelas(limite_de_processos_abertos, tempo_para_arrumar_as_janelas):
             return count
 
         current_count = count_processes_by_name(processo_roblox)
-        
-        if current_count >= limite_de_processos_abertos:    
-            time.sleep(5)
-            user32 = ctypes.WinDLL("user32.dll")
+            
+        if current_count >= limite_de_processos_abertos:   
+            windows = pygetwindow.getWindowsWithTitle("Roblox")
+            windows = [window for window in windows if window.title != "Roblox Account Manager"]
 
-            hwnd_desktop = user32.GetDesktopWindow()
-            user32.TileWindows(hwnd_desktop, 0x0001, None, 0, None)
-            user32.TileWindows(hwnd_desktop, 0x0002, None, 0, None)
-                        
-            time.sleep(tempo_para_arrumar_as_janelas)
+            monitor_info = screeninfo.get_monitors()[0]
+            monitor_width = monitor_info.width
+            monitor_height = monitor_info.height
+
+            max_windows_per_row = 10
+            x_offset = 100 
+            y_offset = 100 
+            width = 100
+            height = 100
+
+            current_x = 0
+            current_y = 0
+            windows_in_current_row = 0
+
+            for i, window in enumerate(windows):
+                if windows_in_current_row >= max_windows_per_row:
+                    current_x = 0
+                    current_y += y_offset
+                    windows_in_current_row = 0
+
+                if current_x + width > monitor_width:
+                    current_x = 0
+                    current_y += y_offset
+                    windows_in_current_row = 0
+
+                if current_y + height > monitor_height:
+                    break
+
+                window.resizeTo(width, height)
+
+                window_x = min(current_x, monitor_width - width)
+                window_y = min(current_y, monitor_height - height)
+
+                window.moveTo(window_x, window_y)
+
+                current_x += x_offset
+                windows_in_current_row += 1
+
+                time.sleep(tempo_para_arrumar_as_janelas)
 
 def Injetar_fluxus(limite_de_processos):
      while True:
